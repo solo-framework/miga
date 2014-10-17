@@ -1,0 +1,29 @@
+{
+    "name": "afi/meme",
+    "description": "Deploy tool",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andrey Filippov",
+            "email": "afi@i-loto.ru"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+
+	    "symfony/yaml": "2.*",
+	    "symfony/console": "2.*",
+	    "symfony/filesystem": "2.*",
+	    "doctrine/dbal": "~2.0"
+    },
+	"autoload": {
+		"psr-0": {
+			"Miga": "src/"
+		}
+	},
+
+	"bin": [
+		"bin/meme"
+	]
+
+}

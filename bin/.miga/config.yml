@@ -1,0 +1,35 @@
+paths:
+    migrations: %%MIGA_CONFIG_DIR%%/migrations
+    binlog: "/var/log/mysql"
+
+environments:
+
+    default_migration_table: _miga_migrations
+    default_database: dev
+
+    dev:
+        driver: pdo_mysql
+        host: ubuntu
+        dbname: geo
+        user: root
+        password: password
+        port: 3306
+        charset: utf8
+#
+#    production:
+#        adapter: mysql
+#        host: production-host
+#        name: dbname
+#        user: root
+#        password: password
+#        port: 3306
+#        charset: utf8
+#
+#    test:
+#        adapter: mysql
+#        host: localhost
+#        name: testing_db
+#        user: root
+#        pass: ''
+#        port: 3306
+#        charset: utf8
