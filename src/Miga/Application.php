@@ -23,8 +23,8 @@ class Application extends \Symfony\Component\Console\Application
 		$this->addCommands(array(
 //				new Command\Check(),
 				new Command\Init(),
-//				new Command\Commit(),
-//				new Command\Create(),
+				new Command\Commit(),
+				new Command\Create(),
 //				new Command\Diff(),
 //				new Command\Log(),
 //				new Command\Migrate(),

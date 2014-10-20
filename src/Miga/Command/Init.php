@@ -30,7 +30,7 @@ class Init extends BaseCommand
 		//$env = $i->getArgument('env');
 
 
-		print_r($this->getConfig());
+		//print_r($this->getConfig());
 
 		if (is_dir($this->configDir))
 		{
@@ -86,15 +86,6 @@ environments:
 EOT;
 
 			file_put_contents($yml, $cnfDummy);
-
-//			mkdir($this->configDir . '/tasks');
-//			touch($this->configDir . '/tasks/.gitignore');
-//
-//			$yml = $this->configDir . "/config.yml";
-//			$envFile = $this->configDir . "/{$env}.php";
-//			touch($yml);
-//			touch($envFile);
-
 
 		}
 

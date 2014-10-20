@@ -10,6 +10,7 @@
 
 namespace Miga\Command;
 
+use Doctrine\DBAL\DriverManager;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -40,13 +41,11 @@ class Status extends BaseCommand
 			throw new \Exception("You should set an environment name");
 
 
-		$dbConfig = $this->getConfig();
-		$dbParams = $dbConfig["environments"][$envName];
+		//$dbConfig = $this->getConfig();
 
-		$conn = \Doctrine\DBAL\DriverManager::getConnection($dbParams);
 
-		$res = $conn->query("SELECT * FROM cities");
-		//print_r($res);
+		$res = $this->getConnection($envName)->query("SELECT * FROM countries");
+		//$output->write(print_r($res->fetchAll(\PDO::FETCH_BOTH), 1));
 
 //		$configDir = getcwd() . "/.meme";
 //		$env = $configDir . "/{$envName}.php";

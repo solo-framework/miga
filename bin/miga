@@ -25,5 +25,5 @@ else
 //array_shift($argv);
 
 $console = new Miga\Application();
-$exitCode = $console->run();
+$exitCode = $console->run(new \Miga\WinUtf8ArgvInput(), new \Miga\WinUtf8ConsoleOutput());
 exit($exitCode);
