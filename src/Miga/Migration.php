@@ -16,5 +16,7 @@ abstract class Migration
 
 	public abstract function down();
 
+	public abstract function insertServiceData();
+
 }
 

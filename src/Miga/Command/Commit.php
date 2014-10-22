@@ -10,6 +10,8 @@
 
 namespace Miga\Command;
 
+use Herrera\Json\Exception\Exception;
+use Miga\Application;
 use Miga\MigrationManager;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -37,16 +39,38 @@ class Commit extends BaseCommand
 		$comment = $input->getArgument("comment");
 		$envName = $input->getOption("env");
 
+		$conn = $this->getConnection($envName);
 		$uid = MigrationManager::getCurrentTime();
+		$mm = new MigrationManager($this->config, $conn);
 //
 		$output->write("\n<comment>Creating new migraton {$uid}...</comment>");
-		$conn = $this->getConnection($envName);
+
+		if (is_file(Application::NEW_MIGRATION_FILE))
+		{
+			$php = file_get_contents(Application::NEW_MIGRATION_FILE);
+
+			$clsUid = str_replace(".", "_", $uid);
+			$php = str_replace("NewMigration", "Migration_{$clsUid}", $php);
+
+			// вставим служебную информацию
+			$serviceData = $mm->generateServiceData($uid, $comment);
+			$php = str_replace("//{SERVICE_DATA}", $serviceData, $php);
+
+			file_put_contents(Application::MIGRATIONS_DIR . DIRECTORY_SEPARATOR . "Migration_" . $clsUid . ".php", $php);
+			@unlink(Application::NEW_MIGRATION_FILE);
+		}
+		else
+		{
+			throw new Exception("Can't find a file with new migration. Run command 'create'");
+		}
 
 		$conn->beginTransaction();
 		try
 		{
 			// сохранение миграции в БД
-			$conn->
+			$mm->insertMigration($uid, $comment);
+
+			$conn->commit();
 		}
 		catch (\Exception $e)
 		{

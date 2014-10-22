@@ -63,6 +63,23 @@ class MigrationManager
 //		$this->dbTool = DBToolFacrory::create($config["db"]);
 	}
 
+	public function generateServiceData($uid, $comment)
+	{
+		$uid = floatval($uid);
+		$comment = $this->connection->quote($comment);
+
+		$code = "\n
+			public function insertServiceData()
+			{
+				\$this->connection->executeQuery(\"INSERT INTO `{$this->migrationTable}` (createTime, comment) VALUES ({$uid}, {$comment})\");
+			}
+			\n
+		";
+
+		return $code;
+		//return "";
+	}
+
 	/**
 	 * Создает таблицу migration
 	 *
@@ -172,27 +189,30 @@ class MigrationManager
 		$this->entityManager->flush();
 	}
 
-	/**
-	 * @return \Doctrine\ORM\EntityRepository
-	 */
-	private function getRepository()
-	{
-		return $this->entityManager->getRepository(__NAMESPACE__ . "\\Migration");
-	}
-
-	public function executeQuery($sql)
-	{
-		$this->entityManager->getConnection()->executeQuery($sql);
-	}
+//	/**
+//	 * @return \Doctrine\ORM\EntityRepository
+//	 */
+//	private function getRepository()
+//	{
+//		return $this->entityManager->getRepository(__NAMESPACE__ . "\\Migration");
+//	}
+//
+//	public function executeQuery($sql)
+//	{
+//		$this->entityManager->getConnection()->executeQuery($sql);
+//	}
 
 	public function insertMigration($createTime, $comment)
 	{
-		$m = new Migration();
-		$m->createTime = floatval($createTime);
-		$m->comment = $comment;
+		return $this->connection->insert($this->migrationTable, array("createTime" => floatval($createTime), "comment" => $comment));
 
-		$this->entityManager->persist($m);
-		$this->entityManager->flush();
+//		$this->connection->executeQuery("INSERT INTO `{$this->migrationTable}` ()", array(floatval($createTime), $comment));
+//		$m = new Migration();
+//		$m->createTime = floatval($createTime);
+//		$m->comment = $comment;
+//
+//		$this->entityManager->persist($m);
+//		$this->entityManager->flush();
 	}
 
 	public static function getCurrentTime()

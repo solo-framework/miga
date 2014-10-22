@@ -12,6 +12,10 @@ namespace Miga;
 
 class Application extends \Symfony\Component\Console\Application
 {
+	const MIGRATIONS_DIR = ".miga/migrations";
+
+	const NEW_MIGRATION_FILE = ".miga/migrations/new_migration.php";
+
 	public function __construct()
 	{
 		parent::__construct("\nWelcome to Miga database bigration tool");

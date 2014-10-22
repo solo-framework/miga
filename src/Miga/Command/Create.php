@@ -10,6 +10,7 @@
 
 namespace Miga\Command;
 
+use Miga\Application;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -61,7 +62,7 @@ class Create extends BaseCommand
 		}
 
 		// создать файл для миграции
-		$migrationsDir = ".miga/migrations";// . $this->config["paths"]["migrations"];
+		$migrationsDir = Application::MIGRATIONS_DIR;// . $this->config["paths"]["migrations"];
 		if (!is_dir($migrationsDir))
 		{
 			mkdir($migrationsDir);
@@ -76,13 +77,17 @@ class NewMigration extends Migration
 {
     public function up()
     {
-
+		//{UP}
     }
 
     public function down()
     {
-
+		//{DOWN}
     }
+
+	// DO NOT DELETE THIS!
+    //{SERVICE_DATA}
+    // DO NOT DELETE THIS!
 }
 EOT;
 

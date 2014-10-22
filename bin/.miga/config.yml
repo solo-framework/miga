@@ -10,7 +10,7 @@ environments:
     dev:
         driver: pdo_mysql
         host: ubuntu
-        dbname: geo
+        dbname: test
         user: root
         password: password
         port: 3306
