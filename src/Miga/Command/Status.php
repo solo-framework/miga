@@ -10,10 +10,12 @@
 
 namespace Miga\Command;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\DBAL\DriverManager;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use zpt\anno\Annotations;
 
 class Status extends BaseCommand
 {
@@ -41,11 +43,25 @@ class Status extends BaseCommand
 			throw new \Exception("You should set an environment name");
 
 
+		$className = "Miga\\Migrations\\Migration_1413831508_0655";
+
+		$cls = new $className();
+
+		$rf = new  \ReflectionClass($className);
+		$classAnnotations = new Annotations($rf);
+		print_r($classAnnotations);
+
+//		$rf = new  \ReflectionClass($className);
+//		print_r($rf->getDocComment());
+//		$ar = new AnnotationReader();
+//		$anns = $ar->getClassAnnotations($rf);
+//		var_dump($anns);
 		//$dbConfig = $this->getConfig();
 
 
-		$res = $this->getConnection($envName)->query("SELECT * FROM countries");
-		//$output->write(print_r($res->fetchAll(\PDO::FETCH_BOTH), 1));
+
+//		$res = $this->getConnection($envName)->query("SELECT * FROM countries");
+//		$output->write(print_r($res->fetchAll(\PDO::FETCH_BOTH), 1));
 
 //		$configDir = getcwd() . "/.meme";
 //		$env = $configDir . "/{$envName}.php";

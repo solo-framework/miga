@@ -27,9 +27,9 @@ class Autoload
 		// Change BaseDir according to Namespace
 		if (strpos($className, 'Miga\\Migrations\\') === 0)
 		{
-			$baseDir = getcwd() . '/.meme/custom';
+			$baseDir = getcwd() . '/.miga/migrations';
+			$postfix = "/{$className}.php";
 			$postfix = substr($postfix, 16);
-
 		}
 		else
 		{
@@ -44,7 +44,7 @@ class Autoload
 //			}
 		}
 
-		//Try to load a normal Mage class (or Task). Think that Mage component is compiled to .phar
+		//Try to load a normal Miga class. Think that component is compiled to .phar
 		$classFileWithinPhar = $baseDir . $postfix;
 		if ($this->isReadable($classFileWithinPhar))
 		{

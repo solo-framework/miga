@@ -23,6 +23,8 @@ class MigrationManager
 
 	public $dbTool = null;
 
+	protected $config = null;
+
 	private $host = null;
 	private $user = null;
 	private $password = null;
@@ -42,6 +44,7 @@ class MigrationManager
 	 */
 	public function __construct($config, Connection $connection)
 	{
+		$this->config = $config;
 		$this->connection = $connection;
 		$this->migrationTable = $config["environments"]["default_migration_table"];
 		$this->dbname = $connection->getDatabase();
@@ -83,11 +86,35 @@ class MigrationManager
 	/**
 	 * Создает таблицу migration
 	 *
-	 * @return void
+	 * @return bool
 	 */
 	public function createMigrationTable()
 	{
-		throw new \Exception("not implemented");
+		$migTable = $this->config["environments"]["default_migration_table"];
+		$res = $this->connection->getSchemaManager()->tablesExist(array($migTable));
+
+		if (!$res)
+		{
+
+			$this->connection->executeQuery("
+				CREATE TABLE `{$migTable}` (
+					`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+					`createTime` DECIMAL(14,4) NOT NULL,
+					`comment` VARCHAR(255) NOT NULL,
+					PRIMARY KEY (`id`)
+				)
+				COLLATE='utf8_general_ci'
+				ENGINE=InnoDB
+				AUTO_INCREMENT=1;
+			");
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+		//throw new \Exception("not implemented");
 //		$conn = $this->entityManager->getConnection();
 //		if (!$conn->getSchemaManager()->tablesExist(array($this->migrationTable)))
 //		{
@@ -218,6 +245,60 @@ class MigrationManager
 	public static function getCurrentTime()
 	{
 		return number_format(microtime(true), 4, '.', '');
+	}
+
+	public function createFileForNewMigration($migrationsDir)
+	{
+		if (!is_dir($migrationsDir))
+		{
+			mkdir($migrationsDir);
+		}
+
+		$dummyFile = <<<EOT
+<?php
+namespace Miga\Migrations;
+
+use Miga\Migration;
+
+/**
+ * Class NewMigration
+ *
+ * @parent {PARENT}
+ *
+ * @comment {COMMENT}
+ *
+ * @package Miga\Migrations
+ */
+
+class NewMigration extends Migration
+{
+    public function up()
+    {
+		//{UP}
+    }
+
+    public function down()
+    {
+		//{DOWN}
+    }
+
+	// DO NOT DELETE THIS!
+    //{SERVICE_DATA}
+    // DO NOT DELETE THIS!
+}
+EOT;
+
+		$dummyFilePath = $migrationsDir . DIRECTORY_SEPARATOR . "new_migration.php";
+
+		if (!is_file($dummyFilePath))
+		{
+			file_put_contents($dummyFilePath, $dummyFile);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }
 

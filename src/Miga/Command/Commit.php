@@ -58,6 +58,7 @@ class Commit extends BaseCommand
 
 			file_put_contents(Application::MIGRATIONS_DIR . DIRECTORY_SEPARATOR . "Migration_" . $clsUid . ".php", $php);
 			@unlink(Application::NEW_MIGRATION_FILE);
+
 		}
 		else
 		{

@@ -9,6 +9,8 @@
 * file that was distributed with this source code.
 */
 
+use Miga\Autoload;
+
 date_default_timezone_set('UTC');
 
 $baseDir = dirname(dirname(__FILE__));
@@ -18,8 +20,8 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php'))
 else
 	die("Can't find autoload file");
 
-//$loader = new \Meme\Autoload();
-//spl_autoload_register(array($loader, 'autoLoad'));
+$loader = new Autoload();
+spl_autoload_register(array($loader, 'autoLoad'));
 
 // Clean arguments
 //array_shift($argv);
