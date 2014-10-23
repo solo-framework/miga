@@ -66,15 +66,19 @@ class MigrationManager
 //		$this->dbTool = DBToolFacrory::create($config["db"]);
 	}
 
-	public function generateServiceData($uid, $comment)
+	public function generateServiceData($uid, $comment, $parent)
 	{
 		$uid = floatval($uid);
 		$comment = $this->connection->quote($comment);
+//		if ($parent == "null")
+//			$parent = null;
 
 		$code = "\n
 			public function insertServiceData()
 			{
-				\$this->connection->executeQuery(\"INSERT INTO `{$this->migrationTable}` (createTime, comment) VALUES ({$uid}, {$comment})\");
+				\$this->connection->executeQuery(
+					\"INSERT INTO `{$this->migrationTable}` (uid, comment, parent) VALUES ({$uid}, {$comment}, {$parent})
+				\");
 			}
 			\n
 		";
@@ -99,9 +103,12 @@ class MigrationManager
 			$this->connection->executeQuery("
 				CREATE TABLE `{$migTable}` (
 					`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-					`createTime` DECIMAL(14,4) NOT NULL,
+					`uid` DECIMAL(14,4) NOT NULL,
 					`comment` VARCHAR(255) NOT NULL,
-					PRIMARY KEY (`id`)
+					`isCurrent` TINYINT(1) NOT NULL DEFAULT '0',
+					`parent` DECIMAL(14,0) NULL DEFAULT NULL,
+					PRIMARY KEY (`id`),
+					UNIQUE INDEX `uid_idx` (`uid`)
 				)
 				COLLATE='utf8_general_ci'
 				ENGINE=InnoDB
@@ -157,7 +164,7 @@ class MigrationManager
 	 */
 	public function getAllMigrations($order = "ASC")
 	{
-		$res = $this->connection->fetchAll("SELECT * FROM `{$this->migrationTable}` ORDER BY `createTime` ASC");
+		$res = $this->connection->fetchAll("SELECT * FROM `{$this->migrationTable}` ORDER BY `uid` ASC");
 		return $res;
 		//return $this->getRepository()->findBy(array(), array("createTime" => $order));
 	}
@@ -169,7 +176,7 @@ class MigrationManager
 	 */
 	public function getLastMigration()
 	{
-		$res = $this->connection->fetchAll("SELECT * FROM `{$this->migrationTable}` ORDER BY `createTime` ASC");
+		$res = $this->connection->fetchAll("SELECT * FROM `{$this->migrationTable}` ORDER BY `uid` ASC");
 		return array_shift($res);
 		//return $this->getRepository()->findOneBy(array(), array("createTime" => "DESC"));
 	}
@@ -200,38 +207,43 @@ class MigrationManager
 		return $this->getRepository()->find($id);
 	}
 
-	public function getCurrentVersion()
+	public function getCurrentMigration()
 	{
 		$res = $this->connection->executeQuery("SELECT * FROM `{$this->migrationTable}` WHERE `isCurrent` = true");
 		return $res->fetch();
-		//return $this->getRepository()->findOneBy(array("isCurrent" => true))->createTime;
 	}
 
-	public function setCurrentVersion($uid)
+	public function getMigrationInstance($className)
 	{
-		$m = $this->getRepository()->findOneBy(array("createTime" => floatval($uid)));
-		$m->isCurrent = true;
-
-		$this->entityManager->persist($m);
-		$this->entityManager->flush();
+		$cls = new $className();
+		$cls->setConnection($this->connection);
+		return $cls;
 	}
 
-//	/**
-//	 * @return \Doctrine\ORM\EntityRepository
-//	 */
-//	private function getRepository()
-//	{
-//		return $this->entityManager->getRepository(__NAMESPACE__ . "\\Migration");
-//	}
-//
-//	public function executeQuery($sql)
-//	{
-//		$this->entityManager->getConnection()->executeQuery($sql);
-//	}
-
-	public function insertMigration($createTime, $comment)
+	public function setCurrentMigration($uid)
 	{
-		return $this->connection->insert($this->migrationTable, array("createTime" => floatval($createTime), "comment" => $comment));
+		// снять флаг current у других миграций
+		$sql = "UPDATE `{$this->migrationTable}` SET isCurrent = false";
+		$this->connection->executeQuery($sql);
+
+		// установить как текущую
+		$sql = "UPDATE `{$this->migrationTable}` SET isCurrent = true WHERE `uid` = ?";
+		$this->connection->executeQuery($sql, array($uid));
+	}
+
+	public function insertMigration($uid, $comment, $parent)
+	{
+		if ($parent == "null")
+			$parent = null;
+		return $this->connection->insert(
+			$this->migrationTable,
+			array(
+				"uid" => floatval($uid),
+				"comment" => $comment,
+				"parent" => $parent,
+				"isCurrent" => 1
+				)
+		);
 
 //		$this->connection->executeQuery("INSERT INTO `{$this->migrationTable}` ()", array(floatval($createTime), $comment));
 //		$m = new Migration();
@@ -247,12 +259,17 @@ class MigrationManager
 		return number_format(microtime(true), 4, '.', '');
 	}
 
-	public function createFileForNewMigration($migrationsDir)
+	public function createFileForNewMigration(/*$migrationsDir*/)
 	{
-		if (!is_dir($migrationsDir))
-		{
-			mkdir($migrationsDir);
-		}
+		$curr = $this->getCurrentMigration();
+		$parent = "null";
+		if ($curr)
+			$parent = $curr;
+
+//		if (!is_dir($migrationsDir))
+//		{
+//			mkdir($migrationsDir);
+//		}
 
 		$dummyFile = <<<EOT
 <?php
@@ -265,7 +282,7 @@ use Miga\Migration;
  *
  * @parent {PARENT}
  *
- * @comment {COMMENT}
+ * @comment ...Add here a comment for this migration...
  *
  * @package Miga\Migrations
  */
@@ -274,12 +291,12 @@ class NewMigration extends Migration
 {
     public function up()
     {
-		//{UP}
+		// Add here code for upgrade DB
     }
 
     public function down()
     {
-		//{DOWN}
+		// Add here code for downgrade DB
     }
 
 	// DO NOT DELETE THIS!
@@ -288,7 +305,8 @@ class NewMigration extends Migration
 }
 EOT;
 
-		$dummyFilePath = $migrationsDir . DIRECTORY_SEPARATOR . "new_migration.php";
+		$dummyFile = str_replace("{PARENT}", $parent, $dummyFile);
+		$dummyFilePath = Application::NEW_MIGRATION_FILE;//$migrationsDir . DIRECTORY_SEPARATOR . "new_migration.php";
 
 		if (!is_file($dummyFilePath))
 		{

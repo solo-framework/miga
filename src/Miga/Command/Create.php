@@ -47,11 +47,11 @@ class Create extends BaseCommand
 		if ($created)
 			$output->writeln("<info>The table for migrations was created</info>");
 
-		$created = $mm->createFileForNewMigration(Application::MIGRATIONS_DIR);
+		$created = $mm->createFileForNewMigration(/*Application::MIGRATIONS_DIR*/);
 		if (!$created)
 			$output->writeln("<info>File for a new migration already exists. You should commit or delete it.</info>");
 		else
-			$output->writeln("<info>File for a new mirgation successfully created.</info>");
+			$output->writeln("<info>File for a new migration successfully created.</info>");
 	}
 }
 

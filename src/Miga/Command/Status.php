@@ -43,14 +43,6 @@ class Status extends BaseCommand
 			throw new \Exception("You should set an environment name");
 
 
-		$className = "Miga\\Migrations\\Migration_1413831508_0655";
-
-		$cls = new $className();
-
-		$rf = new  \ReflectionClass($className);
-		$classAnnotations = new Annotations($rf);
-		print_r($classAnnotations);
-
 //		$rf = new  \ReflectionClass($className);
 //		print_r($rf->getDocComment());
 //		$ar = new AnnotationReader();

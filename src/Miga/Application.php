@@ -14,7 +14,7 @@ class Application extends \Symfony\Component\Console\Application
 {
 	const MIGRATIONS_DIR = ".miga/migrations";
 
-	const NEW_MIGRATION_FILE = ".miga/migrations/new_migration.php";
+	const NEW_MIGRATION_FILE = ".miga/migrations/NewMigration.php";
 
 	public function __construct()
 	{
@@ -28,6 +28,7 @@ class Application extends \Symfony\Component\Console\Application
 //				new Command\Check(),
 				new Command\Init(),
 				new Command\Commit(),
+				new Command\Rollback(),
 				new Command\Create(),
 //				new Command\Diff(),
 //				new Command\Log(),

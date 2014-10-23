@@ -10,6 +10,7 @@
 
 namespace Miga\Command;
 
+use Miga\MigrationManager;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -39,7 +40,6 @@ class Init extends BaseCommand
 		}
 		else
 		{
-
 			$output->writeln("creatin'");
 			mkdir($this->configDir);
 
